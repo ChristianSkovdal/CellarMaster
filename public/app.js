@@ -17,7 +17,7 @@ Ext.application({
         let me = this;
 
         Ext.Viewport.add({
-            xtype: 'login'
+            xtype: 'main'
         });
     }
 });
