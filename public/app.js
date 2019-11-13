@@ -8,8 +8,16 @@ Ext.application({
     },
 
     requires: [
-        'CellarMaster.view.Main'
+        'CellarMaster.view.Login'
     ],
 
-    mainView: 'CellarMaster.view.Main'
+    //mainView: 'CellarMaster.view.Main'
+
+    launch() {
+        let me = this;
+
+        Ext.Viewport.add({
+            xtype: 'login'
+        });
+    }
 });
