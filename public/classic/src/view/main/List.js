@@ -16,9 +16,8 @@ Ext.define('CellarMaster.view.main.List', {
     },
 
     columns: [
-        { text: 'Name',  dataIndex: 'name' },
-        { text: 'Email', dataIndex: 'email', flex: 1 },
-        { text: 'Phone', dataIndex: 'phone', flex: 1 }
+        { text: 'Name', dataIndex: 'name', flex:2 },
+        { text: 'Password', dataIndex: 'password', flex: 1 }
     ],
 
     listeners: {

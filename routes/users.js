@@ -12,16 +12,19 @@ router.get('/', function (req, res, next) {
         throw err;
       }
 
-      let sql = `SELECT DISTINCT name FROM users`;
+      let sql = `SELECT DISTINCT name,password FROM users`;
 
       db.all(sql, [], (err, rows) => {
         if (err) {
           throw err;
         }
 
-        let r = '';
+        let r = [];
         rows.forEach((row) => {
-          r += row.name + '<br>'
+          r.push({
+            "name": row.name,
+            "password": row.password,
+          })
         });
         res.send(r);
       });
