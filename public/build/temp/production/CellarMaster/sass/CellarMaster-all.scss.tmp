@@ -1,5 +1,5 @@
 $app-name:  dynamic( 'CellarMaster' );
-$image-search-path: '/Users/csa/Documents/Dev/CellarMaster/public/cellarmaster/build/production/CellarMaster/modern/resources';
+$image-search-path: '/Users/csa/Documents/Dev/CellarMaster/public/build/production/CellarMaster/modern/resources';
 $theme-name:  dynamic( 'theme-material' );
 $include-cellarmaster-application: dynamic(true);;
 $include-cellarmaster-model-base: dynamic(true);;
