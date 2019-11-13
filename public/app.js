@@ -1,23 +1,18 @@
+/*
+ * This file launches the application by asking Ext JS to create
+ * and launch() the Application class.
+ */
 Ext.application({
+    extend: 'CellarMaster.Application',
+
     name: 'CellarMaster',
 
-    extend: 'Ext.app.Application',
-
-    launch: function () {
-
-    },
-
     requires: [
-        'CellarMaster.view.Login'
+        // This will automatically load all classes in the CellarMaster namespace
+        // so that application classes do not need to require each other.
+        'CellarMaster.*'
     ],
 
-    //mainView: 'CellarMaster.view.Main'
-
-    launch() {
-        let me = this;
-
-        Ext.Viewport.add({
-            xtype: 'main'
-        });
-    }
+    // The name of the initial view to create.
+    mainView: 'CellarMaster.view.main.Main'
 });

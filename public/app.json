@@ -40,17 +40,16 @@
      * that override will in fact only be included in the build if the target class specified
      * in the "override" property is also included.
      */
-  "overrides": [
-    "Shared",
-    "overrides",
-    "${toolkit.name}/overrides"
-  ],
+    "overrides": [
+        "overrides",
+        "${toolkit.name}/overrides"
+    ],
 
     /**
      * Fashion build configuration properties.
      */
     "fashion": {
-
+        "missingParameters": "error",
         "inliner": {
             /**
              * Disable resource inliner. Production builds enable this by default.
@@ -208,6 +207,18 @@
             "bundle": true
         }
     ],
+
+    /**
+     * Settings specific to classic toolkit builds.
+     */
+    "classic": {
+        "js": [
+            // Remove this entry to individually load sources from the framework.
+            {
+                "path": "${framework.dir}/build/ext-all-rtl-debug.js"
+            }
+        ]
+    },
 
     /**
      * Settings specific to modern toolkit builds.
@@ -486,9 +497,32 @@
      * selecting the desired build profile by setting "Ext.manifest" to one of these
      * names.
      *
+     *     "builds": {
+     *         "classic": {
+     *             "toolkit": "classic",
+     *             "theme": "theme-neptune"
+     *         },
+     *
+     *         "modern": {
+     *             "toolkit": "modern",
+     *             "theme": "theme-neptune"
+     *         }
+     *     }
+     *
      */
 
     "builds": {
+        "classic": {
+            "toolkit": "classic",
+            "theme": "theme-triton",
+            "sass": {
+                "generated": {
+                    "var": "classic/sass/save.scss",
+                    "src": "classic/sass/save"
+                }
+            }
+        },
+
         "modern": {
             "toolkit": "modern",
             "theme": "theme-material",
@@ -513,5 +547,5 @@
      * Uniquely generated id for this application, used as prefix for localStorage keys.
      * Normally you should never change this value.
      */
-    "id": "652132ea-2167-4eb2-8936-cabcad9dbae7"
+    "id": "6ee20519-a069-45fe-af5a-265917c859e5"
 }

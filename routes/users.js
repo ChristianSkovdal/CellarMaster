@@ -9,13 +9,25 @@ router.get('/', function (req, res, next) {
 
     let db = new sqlite3.Database('./data/celLman.db', (err) => {
       if (err) {
-        res.send(err.message);
+        throw err;
       }
-      console.log('Connected to the CELLMAN database.');
-  
-  
+
+      let sql = `SELECT DISTINCT name FROM users`;
+
+      db.all(sql, [], (err, rows) => {
+        if (err) {
+          throw err;
+        }
+
+        let r = '';
+        rows.forEach((row) => {
+          r += row.name + '<br>'
+        });
+        res.send(r);
+      });
+
     });
-    res.send('DONE!');
+    
   } catch (error) {
     res.send(error);
   }

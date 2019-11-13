@@ -1,3 +1,5 @@
-# theme-neptune/resources
+# modern/resources
 
-This folder contains static resources (typically an `"images"` folder as well).
+This folder contains resources (such as images) needed by the modern build profile. 
+
+This file can be removed.

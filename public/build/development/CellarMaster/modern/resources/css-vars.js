@@ -5067,6 +5067,41 @@ __rt.register({
     map_get:  function (map, key) {
                 return map.get(key);
             },
+    lighten:  function (color, amount) {
+                if (color == null || color.$isFashionNull) {
+                    return Literal.Null;
+                }
+                if (color.type !== 'hsla' && color.type !== 'rgba') {
+                    Fashion.raise(color + ' is not a color for \'lighten\'');
+                }
+                if (amount.type !== 'number') {
+                    Fashion.raise(amount + ' is not a number for \'lighten\'');
+                }
+                if (amount.value !== Color.constrainPercentage(amount.value)) {
+                    Fashion.raise('Amount ' + amount + ' must be between 0% and 100% for \'lighten\'');
+                }
+
+                return Color.adjust(color, 'lightness', amount);
+            },
+    darken:  function (color, amount) {
+                if (color == null || color.$isFashionNull) {
+                    return Literal.Null;
+                }
+                if (color.type !== 'hsla' && color.type !== 'rgba') {
+                    Fashion.raise(color + ' is not a color for \'darken\'');
+                }
+                if (amount.type !== 'number') {
+                    Fashion.raise(amount + ' is not a number for \'darken\'');
+                }
+
+                if (amount.value !== Color.constrainPercentage(amount.value)) {
+                    Fashion.raise('Amount ' + amount + ' must be between 0% and 100% for \'darken\'');
+                }
+
+                amount = amount.clone();
+                amount.value *= -1;
+                return Color.adjust(color, 'lightness', amount);
+            },
     rgba:  function (red, green, blue, alpha, color) {
                 var colorInst;
 
@@ -5142,6 +5177,46 @@ __rt.register({
                 }
 
                 return new ColorRGBA(red.value, green.value, blue.value, alpha.value);
+            },
+    mix:  function (color_1, color_2, weight) {
+                if (color_1 == null || color_1.$isFashionNull) {
+                    return Literal.Null;
+                }
+                if (color_2 == null || color_2.$isFashionNull) {
+                    return Literal.Null;
+                }
+                
+                weight = (weight !== undefined) ? weight : new Numeric(50, '%');
+
+                if (color_1.type !== 'hsla' && color_1.type !== 'rgba') {
+                    Fashion.raise('arg 1 ' + color_1 + ' is not a color for \'mix\'');
+                }
+                if (color_2.type !== 'hsla' && color_2.type !== 'rgba') {
+                    Fashion.raise('arg 2 ' + color_2 + ' is not a color for \'mix\'');
+                }
+                if (weight.type !== 'number') {
+                    Fashion.raise('arg 3 ' + weight + ' is not a number for \'mix\'');
+                }
+                if (weight.value !== Color.constrainPercentage(weight.value)) {
+                    Fashion.raise('Weight ' + weight + ' must be between 0% and 100% for \'mix\'');
+                }
+
+                color_1 = color_1.getRGBA();
+                color_2 = color_2.getRGBA();
+
+                weight = weight.value / 100;
+
+                var factor = (weight * 2) - 1,
+                    alpha = color_1.a - color_2.a,
+                    weight1 = (((factor * alpha == -1) ? factor : (factor + alpha) / (1 + factor * alpha)) + 1) / 2,
+                    weight2 = 1 - weight1;
+
+                return new ColorRGBA(
+                    (weight1 * color_1.r) + (weight2 * color_2.r),
+                    (weight1 * color_1.g) + (weight2 * color_2.g),
+                    (weight1 * color_1.b) + (weight2 * color_2.b),
+                    (weight * color_1.a) + ((1 - weight) * color_2.a)
+                );
             }
 });
 var __rt_constructor = __rt.constructor.bind(__rt),
@@ -5403,106 +5478,104 @@ __rt_setDynamic("$base-light-color", __rt_getGlobalDefault("$base_light_color") 
 __rt_setDynamic("$base-dark-color", __rt_getGlobalDefault("$base_dark_color") || __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
     __rt_get("$base_color_name"), 
     new __Text("700", "'")]))), 6);
-__rt_setDynamic("$base-pressed-color", __rt_getGlobalDefault("$base_pressed_color") || __rt_box(__rt_registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
-    __rt_get("$base_color"), 
-    new __Numeric(0.8), 
-    __udf, 
-    __udf, 
-    __udf]))), 7);
+__rt_setDynamic("$base-pressed-color", __rt_getGlobalDefault("$base_pressed_color") || __rt_box(__rt_registered.darken.apply(__rt.registered, __rt_applySpreadArgs([
+    (__rt_test(__rt_get("$dark_mode")) ? __rt_box(__rt.registered.darken.apply(__rt.registered, __rt_applySpreadArgs([
+        __rt_get("$base_color"), 
+        new __Numeric(15, "%")]))) : __rt_box(__rt.registered.lighten.apply(__rt.registered, __rt_applySpreadArgs([
+        __rt_get("$base_color"), 
+        new __Numeric(15, "%")])))), 
+    new __Numeric(0, "%")]))), 7);
+__rt_setDynamic("$base-focused-color", __rt_getGlobalDefault("$base_focused_color") || __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
+    __rt_get("$base_color_name"), 
+    new __Text("400", "'")]))), 8);
 __rt_setDynamic("$base-invisible-color", __rt_getGlobalDefault("$base_invisible_color") || __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
     __rt_get("$base_color"), 
     new __Numeric(0), 
     __udf, 
     __udf, 
-    __udf]))), 8);
-__rt_setDynamic("$material-foreground-colors", __rt_getGlobalDefault("$material_foreground_colors") || new __Map([new __Text("red", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("pink", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("purple", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("deep-purple", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("indigo", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("blue", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("light-blue", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("cyan", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("teal", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("green", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("light-green", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("lime", "'"), __ColorRGBA.fromHex("#111111"), new __Text("yellow", "'"), __ColorRGBA.fromHex("#111111"), new __Text("amber", "'"), __ColorRGBA.fromHex("#111111"), new __Text("orange", "'"), __ColorRGBA.fromHex("#111111"), new __Text("deep-orange", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("brown", "'"), __ColorRGBA.fromHex("#ffffff"), new __Text("grey", "'"), __ColorRGBA.fromHex("#111111"), new __Text("blue-grey", "'"), __ColorRGBA.fromHex("#ffffff")]), 9);
+    __udf]))), 9);
+__rt_setDynamic("$material-foreground-colors", __rt_getGlobalDefault("$material_foreground_colors") || new __Map([new __Text("red", "'"), __ColorRGBA.fromHex("#fff"), new __Text("pink", "'"), __ColorRGBA.fromHex("#fff"), new __Text("purple", "'"), __ColorRGBA.fromHex("#fff"), new __Text("deep-purple", "'"), __ColorRGBA.fromHex("#fff"), new __Text("indigo", "'"), __ColorRGBA.fromHex("#fff"), new __Text("blue", "'"), __ColorRGBA.fromHex("#fff"), new __Text("light-blue", "'"), __ColorRGBA.fromHex("#fff"), new __Text("cyan", "'"), __ColorRGBA.fromHex("#fff"), new __Text("teal", "'"), __ColorRGBA.fromHex("#fff"), new __Text("green", "'"), __ColorRGBA.fromHex("#fff"), new __Text("light-green", "'"), __ColorRGBA.fromHex("#222"), new __Text("lime", "'"), __ColorRGBA.fromHex("#222"), new __Text("yellow", "'"), __ColorRGBA.fromHex("#222"), new __Text("amber", "'"), __ColorRGBA.fromHex("#222"), new __Text("orange", "'"), __ColorRGBA.fromHex("#222"), new __Text("deep-orange", "'"), __ColorRGBA.fromHex("#fff"), new __Text("brown", "'"), __ColorRGBA.fromHex("#fff"), new __Text("grey", "'"), __ColorRGBA.fromHex("#222"), new __Text("blue-grey", "'"), __ColorRGBA.fromHex("#fff")]), 10);
 __rt_setDynamic("$base-foreground-color", __rt_getGlobalDefault("$base_foreground_color") || __rt_box((__rt.functions.material_foreground_color || material_foreground_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
-    __rt_get("$base_color_name")]))), 10);
-__rt_setDynamic("$accent_color_name", __rt_getGlobalDefault("$accent_color_name") || new __Text("orange", "'"), 11);
+    __rt_get("$base_color_name")]))), 11);
+__rt_setDynamic("$accent_color_name", __rt_getGlobalDefault("$accent_color_name") || new __Text("orange", "'"), 12);
 __rt_setDynamic("$accent-color", __rt_getGlobalDefault("$accent_color") || __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
     __rt_get("$accent_color_name"), 
-    new __Text("500", "'")]))), 12);
+    new __Text("500", "'")]))), 13);
 __rt_setDynamic("$accent-light-color", __rt_getGlobalDefault("$accent_light_color") || __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
     __rt_get("$accent_color_name"), 
-    new __Text("100", "'")]))), 13);
+    new __Text("100", "'")]))), 14);
 __rt_setDynamic("$accent-dark-color", __rt_getGlobalDefault("$accent_dark_color") || __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
     __rt_get("$accent_color_name"), 
-    new __Text("700", "'")]))), 14);
-__rt_setDynamic("$accent-pressed-color", __rt_getGlobalDefault("$accent_pressed_color") || __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
+    new __Text("700", "'")]))), 15);
+__rt_setDynamic("$accent-pressed-color", __rt_getGlobalDefault("$accent_pressed_color") || (__rt_test(__rt_get("$dark_mode")) ? __rt_box(__rt.registered.darken.apply(__rt.registered, __rt_applySpreadArgs([
     __rt_get("$accent_color"), 
-    new __Numeric(0.8), 
-    __udf, 
-    __udf, 
-    __udf]))), 15);
+    new __Numeric(15, "%")]))) : __rt_box(__rt.registered.lighten.apply(__rt.registered, __rt_applySpreadArgs([
+    __rt_get("$accent_color"), 
+    new __Numeric(15, "%")])))), 16);
 __rt_setDynamic("$accent-invisible-color", __rt_getGlobalDefault("$accent_invisible_color") || __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
     __rt_get("$accent_color"), 
     new __Numeric(0), 
     __udf, 
     __udf, 
-    __udf]))), 16);
+    __udf]))), 17);
 __rt_setDynamic("$accent-foreground-color", __rt_getGlobalDefault("$accent_foreground_color") || __rt_box((__rt.functions.material_foreground_color || material_foreground_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
-    __rt_get("$accent_color_name")]))), 17);
+    __rt_get("$accent_color_name")]))), 18);
 __rt_setDynamic("$confirm-color", __rt_getGlobalDefault("$confirm_color") || __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
     new __Text("light-green", "'"), 
-    new __Text("600", "'")]))), 18);
-__rt_setDynamic("$confirm-pressed-color", __rt_getGlobalDefault("$confirm_pressed_color") || __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
+    new __Text("600", "'")]))), 19);
+__rt_setDynamic("$confirm-pressed-color", __rt_getGlobalDefault("$confirm_pressed_color") || (__rt_test(__rt_get("$dark_mode")) ? __rt_box(__rt.registered.darken.apply(__rt.registered, __rt_applySpreadArgs([
     __rt_get("$confirm_color"), 
-    new __Numeric(0.8), 
-    __udf, 
-    __udf, 
-    __udf]))), 19);
+    new __Numeric(15, "%")]))) : __rt_box(__rt.registered.lighten.apply(__rt.registered, __rt_applySpreadArgs([
+    __rt_get("$confirm_color"), 
+    new __Numeric(15, "%")])))), 20);
 __rt_setDynamic("$alert-color", __rt_getGlobalDefault("$alert_color") || __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
     new __Text("red", "'"), 
-    new __Text("800", "'")]))), 20);
-__rt_setDynamic("$alert-pressed-color", __rt_getGlobalDefault("$alert_pressed_color") || __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
+    new __Text("800", "'")]))), 21);
+__rt_setDynamic("$alert-pressed-color", __rt_getGlobalDefault("$alert_pressed_color") || (__rt_test(__rt_get("$dark_mode")) ? __rt_box(__rt.registered.darken.apply(__rt.registered, __rt_applySpreadArgs([
     __rt_get("$alert_color"), 
-    new __Numeric(0.8), 
-    __udf, 
-    __udf, 
-    __udf]))), 21);
-__rt_setDynamic(__strings._, __rt_getGlobalDefault(__strings._) || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#fff") : __ColorRGBA.fromHex("#111111")), 22);
+    new __Numeric(15, "%")]))) : __rt_box(__rt.registered.lighten.apply(__rt.registered, __rt_applySpreadArgs([
+    __rt_get("$alert_color"), 
+    new __Numeric(15, "%")])))), 22);
+__rt_setDynamic(__strings._, __rt_getGlobalDefault(__strings._) || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#fff") : __ColorRGBA.fromHex("#111111")), 23);
+__rt_setDynamic("$reverse-color", __rt_getGlobalDefault("$reverse_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#222") : __ColorRGBA.fromHex("#fff")), 24);
 __rt_setDynamic("$highlight-color", __rt_getGlobalDefault("$highlight_color") || __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
     __rt_get(__strings._), 
     new __Numeric(0.54), 
     __udf, 
     __udf, 
-    __udf]))), 23);
+    __udf]))), 25);
 __rt_setDynamic("$disabled-color", __rt_getGlobalDefault("$disabled_color") || __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
     __rt_get(__strings._), 
     new __Numeric(0.38), 
     __udf, 
     __udf, 
-    __udf]))), 24);
-__rt_setDynamic("$divider-color", __rt_getGlobalDefault("$divider_color") || __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
-    __rt_get(__strings._), 
-    new __Numeric(0.12), 
-    __udf, 
-    __udf, 
-    __udf]))), 25);
-__rt_setDynamic("$reverse-color", __rt_getGlobalDefault("$reverse_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#222") : __ColorRGBA.fromHex("#fff")), 26);
-__rt_setDynamic("$reverse-highlight-color", __rt_getGlobalDefault("$reverse_highlight_color") || __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
-    __rt_get("$reverse_color"), 
-    new __Numeric(0.54), 
-    __udf, 
-    __udf, 
-    __udf]))), 27);
+    __udf]))), 26);
 __rt_setDynamic("$reverse-disabled-color", __rt_getGlobalDefault("$reverse_disabled_color") || __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
     __rt_get("$reverse_color"), 
     new __Numeric(0.38), 
     __udf, 
     __udf, 
-    __udf]))), 28);
-__rt_setDynamic("$reverse-divider-color", __rt_getGlobalDefault("$reverse_divider_color") || __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
+    __udf]))), 27);
+__rt_setDynamic("$divider-color", __rt_getGlobalDefault("$divider_color") || __rt_box(__rt.registered.mix.apply(__rt.registered, __rt_applySpreadArgs([
+    __rt_get(__strings._), 
     __rt_get("$reverse_color"), 
-    new __Numeric(0.12), 
-    __udf, 
-    __udf, 
-    __udf]))), 29);
-__rt_setDynamic("$background-color", __rt_getGlobalDefault("$background_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#303030") : __ColorRGBA.fromHex("#fafafa")), 30);
-__rt_setDynamic("$alt-background-color", __rt_getGlobalDefault("$alt_background_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#3a3a3a") : __ColorRGBA.fromHex("#f5f5f5")), 31);
-__rt_setDynamic("$reverse-background-color", __rt_getGlobalDefault("$reverse_background_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#fafafa") : __ColorRGBA.fromHex("#303030")), 32);
-__rt_setDynamic("$reverse-alt-background-color", __rt_getGlobalDefault("$reverse_alt_background_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#f5f5f5") : __ColorRGBA.fromHex("#3a3a3a")), 33);
-__rt_setDynamic("$faded-color", __rt_getGlobalDefault("$faded_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#4d4d4d") : __ColorRGBA.fromHex("#c3c3c3")), 34);
+    new __Numeric(12, "%")]))), 28);
+__rt_setDynamic("$selected-background-color", __rt_getGlobalDefault("$selected_background_color") || (__rt_test(__rt_get("$dark_mode")) ? __rt_get("$base_dark_color") : __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
+    new __Text("grey", "'"), 
+    new __Text("300", "'")])))), 29);
+__rt_setDynamic("$hovered-background-color", __rt_getGlobalDefault("$hovered_background_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#4d4d4d") : __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
+    new __Text("grey", "'"), 
+    new __Text("200", "'")])))), 30);
+__rt_setDynamic("$header-background-color", __rt_getGlobalDefault("$header_background_color") || (__rt_test(__rt_get("$dark_mode")) ? __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
+    new __Text("grey", "'"), 
+    new __Text("800", "'")]))) : __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
+    new __Text("grey", "'"), 
+    new __Text("100", "'")])))), 31);
+__rt_setDynamic("$faded-color", __rt_getGlobalDefault("$faded_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#4d4d4d") : __ColorRGBA.fromHex("#e1e1e1")), 32);
+__rt_setDynamic("$background-color", __rt_getGlobalDefault("$background_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#303030") : __ColorRGBA.fromHex("#fafafa")), 33);
+__rt_setDynamic("$alt-background-color", __rt_getGlobalDefault("$alt_background_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#3a3a3a") : __ColorRGBA.fromHex("#f5f5f5")), 34);
+__rt_setDynamic("$reverse-background-color", __rt_getGlobalDefault("$reverse_background_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#fafafa") : __ColorRGBA.fromHex("#303030")), 35);
+__rt_setDynamic("$reverse-alt-background-color", __rt_getGlobalDefault("$reverse_alt_background_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#f5f5f5") : __ColorRGBA.fromHex("#3a3a3a")), 36);
 __rt_setDynamic("$overlay-color", __rt_getGlobalDefault("$overlay_color") || (__rt_test(__rt_get("$dark_mode")) ? __rt_box(__rt.registered.rgba.apply(__rt.registered, __rt_applySpreadArgs([
     __ColorRGBA.fromHex("#fff"), 
     new __Numeric(0.03), 
@@ -5513,13 +5586,13 @@ __rt_setDynamic("$overlay-color", __rt_getGlobalDefault("$overlay_color") || (__
     new __Numeric(0.03), 
     __udf, 
     __udf, 
-    __udf])))), 35);
-__rt_setDynamic("$content-padding", __rt_getGlobalDefault("$content_padding") || new __Numeric(16, "px"), 36);
-__rt_setDynamic("$listitem-selected-background-color", __rt_getGlobalDefault("$listitem_selected_background_color") || (__rt_test(__rt_get("$dark_mode")) ? __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
-    __rt_get("$base_color_name"), 
-    new __Text("700", "'")]))) : __rt_box((__rt.functions.material_color || material_color__fn).apply(__rt.functions, __rt_applySpreadArgs([
-    __rt_get("$base_color_name"), 
-    new __Text("200", "'")])))), 37);
+    __udf])))), 37);
+__rt_setDynamic("$content-padding", __rt_getGlobalDefault("$content_padding") || new __Numeric(16, "px"), 38);
+__rt_setDynamic("$dataview_item_selected_background_color", __rt_getGlobalDefault("$dataview_item_selected_background_color") || __rt_get("$selected_background_color"), 39);
+__rt_setDynamic("$dataitem_selected_background_color", __rt_getGlobalDefault("$dataitem_selected_background_color") || __rt_get("$dataview_item_selected_background_color"), 40);
+__rt_setDynamic("$listitem-selected-background-color", __rt_getGlobalDefault("$listitem_selected_background_color") || __rt_get("$dataitem_selected_background_color"), 41);
+__rt_setDynamic("$reverse-border-color", __rt_getGlobalDefault("$reverse_border_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#212121") : __ColorRGBA.fromHex("#e0e0e0")), 42);
+__rt_setDynamic("$reverse-alt-border-color", __rt_getGlobalDefault("$reverse_alt_border_color") || (__rt_test(__rt_get("$dark_mode")) ? __ColorRGBA.fromHex("#3a3a3a") : __ColorRGBA.fromHex("#e0e0e0")), 43);
 },
  {
 	":root": [
@@ -5529,6 +5602,7 @@ __rt_setDynamic("$listitem-selected-background-color", __rt_getGlobalDefault("$l
 		"base-light-color",
 		"base-dark-color",
 		"base-pressed-color",
+		"base-focused-color",
 		"base-invisible-color",
 		"base-foreground-color",
 		"accent-color",
@@ -5542,24 +5616,29 @@ __rt_setDynamic("$listitem-selected-background-color", __rt_getGlobalDefault("$l
 		"alert-color",
 		"alert-pressed-color",
 		__names._,
+		"reverse-color",
 		"highlight-color",
 		"disabled-color",
-		"divider-color",
-		"reverse-color",
-		"reverse-highlight-color",
 		"reverse-disabled-color",
-		"reverse-divider-color",
+		"divider-color",
+		"selected-background-color",
+		"hovered-background-color",
+		"header-background-color",
+		"faded-color",
 		"background-color",
 		"alt-background-color",
 		"reverse-background-color",
 		"reverse-alt-background-color",
-		"faded-color",
 		"overlay-color",
 		"content-padding",
-		"listitem-selected-background-color"
+		"listitem-selected-background-color",
+		"reverse-border-color",
+		"reverse-alt-border-color"
 	],
 	"html": [
 		"base_color_name",
-		"accent_color_name"
+		"accent_color_name",
+		"dataview_item_selected_background_color",
+		"dataitem_selected_background_color"
 	]});
 })(Fashion);
