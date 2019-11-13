@@ -25,11 +25,14 @@ Ext.define('CellarMaster.view.MainController', {
     },
 
     onInit() {
+
+
+
         //debugger;
         //this.fireEvent('initui');
         Ext.Ajax.request({
-            //url: 'http://localhost:3000/users',
-            url: 'https://cellman.herokuapp.com/users',
+            url: 'http://localhost:3000/users',
+            //url: 'https://cellman.herokuapp.com/users',
             method: 'GET',
             timeout: 10000,
             // params:
